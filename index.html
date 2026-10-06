@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quiz Management</title>
+<style>
+:root{--bg:#eef2f6;--card:#fff;--ink:#14213d;--mute:#5b6779;--line:#d5dce6;--acc:#2b59c3;--ok:#1b7f4b;--okb:#e1f4ea;--ko:#b3261e;--kob:#fbe6e4}
+@media(prefers-color-scheme:dark){:root{--bg:#10151d;--card:#19212d;--ink:#e8edf5;--mute:#9aa7ba;--line:#2b3647;--acc:#7da2ff;--ok:#5fd596;--okb:#14301f;--ko:#ff8a80;--kob:#3a1a18}}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:17px/1.5 Georgia,serif;padding:max(16px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom))}
+main{max-width:640px;margin:0 auto}h1{font-size:26px;margin:8px 0 4px}
+p.s{color:var(--mute);margin:0 0 16px;font:15px system-ui,sans-serif}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:14px}
+button{font:16px system-ui,sans-serif;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px 14px;width:100%;text-align:left;margin:0 0 8px;cursor:pointer}
+button:focus-visible,select:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+button.p{background:var(--acc);color:#fff;border-color:var(--acc);text-align:center;font-weight:600}
+button.sel{border-color:var(--acc);box-shadow:inset 0 0 0 2px var(--acc)}
+button.ok{background:var(--okb);border-color:var(--ok)}button.ko{background:var(--kob);border-color:var(--ko)}
+.bar{height:6px;background:var(--line);border-radius:3px;margin:6px 0 14px}.bar i{display:block;height:100%;background:var(--acc);border-radius:3px}
+.meta{font:14px system-ui,sans-serif;color:var(--mute);margin:2px 0 6px}
+.q{font-size:19px;margin:6px 0 12px}
+.ex{border-left:4px solid var(--acc);padding:4px 12px;margin:10px 0 14px;font:15px system-ui,sans-serif}
+.big{font-size:44px;font-weight:700;margin:4px 0}
+.err{font:15px system-ui,sans-serif;border-top:1px solid var(--line);padding:10px 0}
+select{font:16px system-ui,sans-serif;padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);width:100%;margin-bottom:12px}
+</style></head><body><main id="app"></main>
+<script>
+const Q=[],X="Aucune réponse";
+const T={E:"Modèle d'examen (SEG)",K:"TD4 Kougbadi",A:"TD4 Agonhossou",B:"TD1 Assogba",C:"Questions d'entraînement"};
+const K={u:"QCU",m:"QCM (plusieurs réponses)",v:"Vrai / Faux",o:"Question d'entraînement"};
+const th=s=>s.startsWith("TD4 Kougbadi")?"K":s.startsWith("TD4 Agonhossou")?"A":"B";
+const SEG=(s,q,o,a,dd,e)=>Q.push({k:"m",t:"E",s:"SEG · "+s,q,o:[...o,"N : aucune proposition n'est bonne"],a,e,dd});
+const TD=(s,k,q,o,a,e,dd)=>Q.push({k,t:th(s),s,q,o,a,e,dd});
+const CARD=(q,a,s)=>Q.push({k:"o",t:"C",s,q,a});
+/* ===== SEG TRONC COMMUN (modèle d'examen) ===== */
+SEG("Partie 1","Repérer l'intrus ou les intrus parmi les fondateurs de l'École des relations humaines :",["Maslow","Taylor","Mayo","Mintzberg"],[1,3],1,"Taylor (école classique) et Mintzberg (structures) ne sont pas de l'école des relations humaines.");
+SEG("Partie 1","Chercher l'intrus dans les principes de la bureaucratie wébérienne :",["L'établissement des normes sur les membres du groupe se fait par accord mutuel ou par application de la rationalité","La loi est faite d'un corps de règles abstraites établies intentionnellement","Ceux qui sont en position d'autorité occupent une fonction dans laquelle ils sont sujets à un ordre impersonnel","L'obéissance est due à la personne qui occupe une fonction et non à la position qu'elle occupe dans un ordre"],[3],0,"Chez Weber, l'obéissance est due à la fonction (la position), pas à la personne.");
+SEG("Partie 1","Selon Henri Fayol, l'administration des entreprises se définit selon la formule :",["Planifier, organiser, commander, coordonner et motiver","Planifier, organiser, commander, coordonner et gérer","Planifier, organiser, commander, coordonner et individualiser","Planifier, organiser, commander, coordonner et contrôler"],[3],0);
+SEG("Partie 1","On désigne les études réalisées par Elton Mayo et d'autres chercheurs de Harvard sous le nom de :",["Expérience de Glenburr","Expérience de Hawthorne","Expérience de Taylor","Expérience de Simon"],[1],0);
+SEG("Partie 2","« The right man on the right place » s'applique :",["À la division scientifique du travail","À la théorie de la contingence","À l'école des relations humaines","À l'école des décisions"],[0],1,"Principe de la sélection scientifique des ouvriers (Taylor).");
+SEG("Partie 2","Selon les travaux de George Elton Mayo :",["La simple connaissance de l'individu du fait qu'il est sujet d'observation modifie son comportement","La simple connaissance de l'individu du fait qu'il est sujet d'observation ne modifie pas son comportement","Si la direction de l'entreprise exprime un intérêt pour le comportement des salariés, cela peut améliorer leur productivité"],[0,2],1,"Effet Hawthorne. Les options c et d de l'épreuve sont identiques à l'impression ; je n'en garde qu'une.");
+SEG("Partie 2","Le « one best way » a été farouchement contesté par les auteurs :",["De l'école de la contingence","De l'école des relations humaines","De l'école du processus de gestion","De l'école quantitative"],[0],1,"La contingence refuse qu'une seule règle convienne à toutes les situations.");
+SEG("Partie 2","Parmi les propositions suivantes, laquelle (ou lesquelles) est (sont) une forme de veille ?",["Veille technologique","Veille financière","Veille commerciale","Veille philosophique"],[0,1,2],0);
+SEG("Partie 4","Parmi les objectifs suivants, quels sont ceux qui correspondent à la finalité financière de l'entreprise ?",["Dégager une rentabilité des capitaux propres de 10 %","Réduire les coûts de fonctionnement de l'entreprise de 3 %","Réduire le temps de travail sans diminution des salaires"],[0,1],1,"Le 3e objectif est un objectif social.");
+SEG("Partie 4","La RSE correspond à :",["La prise en compte des impacts environnementaux","L'attention portée aux salariés","La recherche de la rentabilité maximale"],[0,1],1);
+SEG("Partie 4","Les parties prenantes d'une entreprise sont en particulier :",["Les salariés","Les actionnaires","Les clients et les fournisseurs"],[0,1,2],0);
+SEG("Partie 5","Le salaire comme motivation principale la plus importante est un principe de base :",["Du taylorisme","De George Elton Mayo","De l'école sociotechnique","De la théorie de Herzberg"],[0],0);
+SEG("Partie 5","Généralement dans les manuels de management, on présente le taylorisme comme étant l'application des principes suivants :",["La décomposition des tâches en éléments constitutifs","L'analyse de ces éléments pour élaborer une meilleure méthode","L'établissement de normes de rendement et une rémunération variable","La sélection scientifique des ouvriers"],[0,1,2,3],0);
+SEG("Partie 5","Les budgets sont :",["Des instruments de prévision des charges et de produits","Des outils pour le manager","Des comptes bancaires"],[0,1],1);
+SEG("Partie 3","Si les objectifs visés ne sont pas atteints, le manager :",["S'efforce de limiter ses responsabilités","Cherche les raisons des écarts","Prend des mesures correctives"],[1,2],1,"Contrôle : analyse des écarts puis correction des écarts défavorables.");
+SEG("Partie 3","L'étude de marché vise à :",["Déterminer la clientèle potentielle","Déterminer la situation des concurrents","Déterminer le montant des capitaux nécessaires pour une décision"],[0,1],1);
+/* ===== TD4 Kougbadi, Dossier 1 (clé : tes notes) ===== */
+TD("TD4 Kougbadi D1","m","Que préconise TAYLOR à travers l'OST (Organisation Scientifique du Travail) ?",["Autonomie et liberté des salariés","Chronométrage des temps d'exécution","Décomposition des tâches","Rémunération au rendement","Spécialisation des individus"],[1,2,3,4]);
+TD("TD4 Kougbadi D1","u","À quelle structure se rapporte la notion : « elle est fondée sur le principe de l'unité de commandement » ?",["Structure hiérarchique","Structure par fonction","Structure additionnelle","Structure élastique","Structure matricielle","Structure divisionnaire"],[0]);
+TD("TD4 Kougbadi D1","v","La responsabilité sociale de l'entreprise peut se définir comme étant l'ensemble des conséquences humaines et sociales de son action.",["Vrai","Faux"],[0],"Définition classique de la RSE. Ta clé note Faux ici mais Vrai à la question 70 de l'autre TD : fais confirmer.");
+TD("TD4 Kougbadi D1","m","Le rôle social de l'entreprise peut s'exprimer dans plusieurs directions. Lesquelles ?",["Mission d'insertion, sur le marché du travail, des populations en difficulté","Inciter les citoyens à voter aux élections","Rôle de formation des jeunes par l'apprentissage","Créer du profit"],[0,2]);
+TD("TD4 Kougbadi D1","m","Quels sont les facteurs d'évolution de l'organisation de la production ?",["Les attentes sociales (évolution du genre de vie)","La construction de l'image de l'entreprise","L'évolution de la demande (recherche de produits personnalisés)","La création artistique des salariés"],[1,2]);
+TD("TD4 Kougbadi D1","m","Parmi les propositions suivantes, quels sont les objectifs de la GRH ?",["Minimiser les coûts et accroître la productivité","Motiver les salariés","Augmenter la rémunération des dirigeants","Réduire les effectifs et précariser le personnel"],[0,1]);
+TD("TD4 Kougbadi D1","m","Quels sont les facteurs d'évolution de la gestion du personnel dans l'entreprise ?",["Le besoin de flexibilité","Le besoin de nouvelles qualifications","La politique keynésienne","Les directions du personnel"],[0,1]);
+TD("TD4 Kougbadi D1","v","Le dialogue social désigne l'ensemble des pratiques et règles qui structurent les rapports entre employeurs et actionnaires.",["Vrai","Faux"],[1],"Il structure les rapports entre employeurs et salariés.");
+TD("TD4 Kougbadi D1","m","Quels sont les objectifs de la formation pour les salariés ?",["Plus grande productivité","Enrichissement personnel","Facteur de production","Plus de flexibilité","Meilleure adaptation aux évolutions techniques"],[1,3,4]);
+TD("TD4 Kougbadi D1","m","Quels sont les objectifs de la formation pour l'entreprise ?",["Plus grande productivité","Enrichissement personnel","Facteur de production","Plus de flexibilité","Meilleure adaptation aux évolutions techniques"],[0]);
+TD("TD4 Kougbadi D1","m","Parmi les affirmations suivantes concernant les structures d'entreprise, lesquelles sont justes ?",["Structure hiérarchique","Structure par fonction","Structure additionnelle","Structure élastique","Structure matricielle","Structure divisionnaire"],[0,1,2,4,5],"Selon ta clé : tout sauf la structure élastique. Question à vérifier en cours.");
+TD("TD4 Kougbadi D1","u","À quelle structure se rapporte la notion : « elle regroupe les tâches par type de produit, de client ou par unité géographique » ?",["Structure hiérarchique","Structure par fonction","Structure additionnelle","Structure élastique","Structure matricielle","Structure divisionnaire"],[5]);
+TD("TD4 Kougbadi D1","u","À quelle structure se rapporte la notion : « elle regroupe les tâches sur la base des processus de travail ou des fonctions (production, vente…) » ?",["Structure hiérarchique","Structure par fonction","Structure additionnelle","Structure élastique","Structure matricielle","Structure divisionnaire"],[1]);
+TD("TD4 Kougbadi D1","m","Quels sont les facteurs qui agissent sur la structure de l'entreprise ?",["L'âge","La taille","La date de naissance","L'environnement","Le système technique","La motivation des salariés"],[0,1,3,4]);
+TD("TD4 Kougbadi D1","v","Plus une organisation est âgée et grande, plus elle a un comportement formalisé.",["Vrai","Faux"],[0]);
+TD("TD4 Kougbadi D1","m","L'environnement comprend quelques caractéristiques. Lesquelles ?",["La stabilité","La complexité","L'hostilité"],[1,2]);
+TD("TD4 Kougbadi D1","v","Le besoin de pouvoir des dirigeants conduit l'entreprise à décentraliser sa structure.",["Vrai","Faux"],[1]);
+TD("TD4 Kougbadi D1","u","Maslow, à travers la (mot à trouver), explique la motivation des travailleurs.",["Pyramide des âges","Pyramide des besoins","Pyramide institutionnelle","Pyramide des motivations"],[1]);
+TD("TD4 Kougbadi D1","m","Parmi les propositions suivantes, laquelle (ou lesquelles) représente(nt) une menace pour l'entreprise ?",["Difficultés d'approvisionnement","Apparition du marché des séniors","Évolution de la mode","Augmentation du taux d'activité des femmes"],[0,1]);
+TD("TD4 Kougbadi D1","m","Les critères de classification d'une entreprise sont :",["Le secteur auquel elle appartient","Le chiffre d'affaires réalisé","Le nombre de salariés","Le nombre de filiales","La qualité des actionnaires"],[0,1,2]);
+TD("TD4 Kougbadi D1","m","Parmi les limites de l'école classique, on peut citer :",["Son caractère normatif (standardiser, spécialisation…)","L'ignorance des interrelations entre organisation et son environnement","La négligence du facteur humain","L'OST conduit à un travail monotone","La monotonie engendre la frustration et l'absentéisme","La bureaucratie limite l'initiative pour changer et la créativité pour innover"],[0,2,3,4,5]);
+TD("TD4 Agonhossou 1-22","m","La culture d'entreprise trouve ses fondements dans :",["La culture nationale","La stratégie générale de l'entreprise","L'histoire de l'entreprise","L'organisation du comité d'entreprise"],[0,2]);
+TD("TD4 Agonhossou 1-22","m","Parmi les affirmations suivantes, laquelle (ou lesquelles) est (sont) juste(s) ?",["La culture d'entreprise contribue à forger l'identité de l'entreprise","La culture d'entreprise participe à la construction de l'image de l'entreprise","La culture d'entreprise n'a pas d'influence sur le management","La culture d'entreprise aide à la création artistique des salariés"],[0,1]);
+TD("TD4 Agonhossou 1-22","m","Concrètement, comment se manifeste la culture d'entreprise ?",["Rites","Valeurs (idées et croyances)","Respect des dirigeants","Absence de cohésion"],[0,1]);
+TD("TD4 Agonhossou 1-22","m","La culture d'entreprise remplit plusieurs rôles :",["Facteur de cohésion","Facteur d'adaptation pour le service des ressources humaines","Facteur d'économie d'énergie","Facteur d'orientation pour la stratégie de l'entreprise"],[0,1,3]);
+TD("TD4 Agonhossou 1-22","m","Quels sont les objectifs du projet d'entreprise ?",["Limiter l'esprit d'équipe","Décrire une mission","Définir un plan d'action","Fédérer le personnel autour d'une mission","Réduire la liberté d'action de chacun"],[1,2,3]);
+TD("TD4 Agonhossou 1-22","m","Quelles sont les limites du projet d'entreprise ?",["Il limite les possibilités d'adaptation","C'est une méthode de gestion de la culture d'entreprise","Risque de rejet par les salariés qui n'y adhèrent pas"],[0,2]);
+TD("TD4 Agonhossou 1-22","m","Parmi les propositions suivantes, laquelle (ou lesquelles) correspond(ent) à un mode d'exercice du pouvoir ?",["Pouvoir directif","Pouvoir technocratique","Pouvoir collectif","Pouvoir moderne","Pouvoir imitateur"],[0,1]);
+TD("TD4 Agonhossou 1-22","m","Que permet la décentralisation du pouvoir de décision ?",["Meilleure implication du personnel","Meilleure efficacité des décisions","Plus grand contrôle des décisions","Circulation plus lente de l'information"],[0,1]);
+TD("TD4 Agonhossou 1-22","m","D'après le modèle IMC de SIMON, parmi les propositions suivantes, lesquelles sont des phases du processus de décision ?",["Phase d'Intelligence du problème","Phase d'Intellectualisation du problème","Phase de Modélisation du problème","Phase de Matérialisation du problème","Phase de Mise en œuvre des solutions","Phase de Capitalisation des solutions"],[0,2]);
+TD("TD4 Agonhossou 1-22","m","Parmi les propositions suivantes, quelles sont les qualités essentielles pour qu'une information soit de qualité ?",["Pertinente","Confidentielle","Gratuite","Subjective","Accessible"],[0,4]);
+TD("TD4 Agonhossou 1-22","m","Parmi les propositions suivantes, quelles sont les étapes du traitement de l'information ?",["Collecte","Stockage","Traitement","L'informatiser","Diffusion"],[0,1,2,4]);
+TD("TD4 Agonhossou 1-22","m","Parmi les propositions suivantes, laquelle (ou lesquelles) est (sont) une forme de veille ?",["Veille technologique","Veille financière","Veille commerciale","Veille philosophique","Veille sportive"],[0,1,2],"Clé lue : a, b, c (la 3e lettre de ta clé est peu lisible).");
+TD("TD4 Agonhossou 1-22","u","Qu'est-ce que la mercatique ?",["Actions qui ont pour objectif de prévoir, stimuler ou renouveler les besoins des consommateurs","Actions qui ont pour objectif de réaliser l'adaptation de l'appareil productif et de l'appareil commercial aux besoins constatés","Actions qui ont pour objectif d'améliorer l'innovation des produits","Actions qui ont pour objectif de motiver les commerciaux dans l'entreprise"],[1]);
+TD("TD4 Agonhossou 1-22","u","Comment caractériser le marché potentiel ou futur ?",["Il est composé des agents d'influence","Il est composé des non consommateurs absolus","Il est composé des clients de la concurrence","Il est composé des personnes ne consommant pas actuellement un produit mais pourront consommer ultérieurement","Il est composé des clients de l'entreprise"],[3]);
+TD("TD4 Agonhossou 1-22","u","Comment se nomme un marché constitué de quelques offreurs face à de nombreux acheteurs ?",["Marché de concurrence monopolistique","Oligopole","Monopole","Monopsone"],[1]);
+TD("TD4 Agonhossou 1-22","u","Qu'est-ce que la marque ?",["L'aspect extérieur d'un produit","Le design en anglais","Le packaging en anglais","Un signe distinctif qui sert à différencier des produits similaires"],[3]);
+TD("TD4 Agonhossou 1-22","m","Quelles sont les différentes phases de la vie d'un produit ?",["Lancement","Maturité","Temporisation","Profitabilité","Expérimentation","Déclin"],[0,1,5]);
+TD("TD4 Agonhossou 1-22","v","La distribution est l'ensemble des opérations qui permettent de fournir un bien ou un service au consommateur.",["Vrai","Faux"],[0]);
+TD("TD4 Agonhossou 1-22","u","Qu'est-ce qu'une décision tactique ?",["Elle est prise au plus haut niveau institutionnel et engage la firme sur le long terme","Elle participe au pilotage de l'entreprise par les cadres","Elle traduit sur le terrain les buts et objectifs d'une entreprise"],[1]);
+TD("TD4 Agonhossou 1-22","m","Quels sont les rôles économiques de l'entreprise ?",["C'est une unité de production","C'est un lieu d'épanouissement ou de frustration","C'est une unité de répartition","C'est une unité sociétale"],[0,2]);
+TD("TD4 Agonhossou 1-22","v","La logistique gère les flux matériels et informationnels d'une entreprise.",["Vrai","Faux"],[0]);
+TD("TD4 Agonhossou 23-37","m","Parmi les affirmations suivantes, quels sont les aspects essentiels de la politique d'approvisionnement ?",["Gestion des rémunérations des salariés","Gestion des stocks","Gestion des achats","Gestion du pouvoir de décision"],[1,2]);
+TD("TD4 Agonhossou 23-37","m","Parmi les affirmations suivantes concernant les phases d'un processus d'achat, lesquelles sont justes ?",["La reconnaissance du besoin","La recherche des fournisseurs","Le stockage des produits","Le suivi des stocks","Le suivi des commandes"],[0,1,4]);
+TD("TD4 Agonhossou 23-37","u","Comment mesure-t-on la rentabilité financière ?",["Actif total / résultats d'exploitation","Résultats de l'exercice / actif total","EBE / actif total","Résultat / capitaux propres"],[3]);
+TD("TD4 Agonhossou 23-37","u","Comment caractériser la notion de solvabilité dans l'entreprise ?",["C'est la capacité de l'entreprise à régler ses dettes à échéance","C'est la capacité de financer elle-même la plupart de ses investissements","C'est la faible capacité d'endettement"],[0]);
+TD("TD4 Agonhossou 23-37","u","Comment mesure-t-on le rendement des capitaux investis ?",["Capacité d'autofinancement / capitaux propres","Résultats de l'exercice / actif total","EBE / (immobilisations + BFRE)","Résultat d'exploitation / (immobilisations + BFRE)"],[3]);
+TD("TD4 Agonhossou 23-37","m","Parmi les propositions suivantes, laquelle (ou lesquelles) est (sont) une forme de veille ?",["Veille technologique","Veille financière","Veille commerciale","Veille philosophique","Veille sportive"],[0,1,2]);
+TD("TD4 Agonhossou 23-37","m","On identifie différents types de marchés correspondant à des groupes de clients. Lesquels parmi les propositions suivantes ?",["Marché principal","Marché complémentaire","Marché quantitatif","Marché générique","Marché qualitatif"],[0,1,3]);
+TD("TD4 Agonhossou 23-37","m","Quels sont les différents canaux de distribution ?",["Canal direct","Canal intensif","Canal sélectif","Canal court ou long"],[0,3]);
+TD("TD4 Agonhossou 23-37","m","Quels sont les différents systèmes de production ?",["La production en continu","La production par lotissement","La production unitaire","La production par petites séries","La production de masse","La production par capitalisation"],[0,2,3,4]);
+TD("TD4 Agonhossou 23-37","u","Qu'est-ce que la production en continu ?",["Le produit est unique mais le nombre d'unités produites est quasiment illimité","C'est la fabrication de produits standardisés en très grandes quantités afin de réaliser des économies d'échelle","C'est la production à la commande","C'est la production en petites quantités de produits ou de services identiques"],[0]);
+TD("TD4 Agonhossou 23-37","u","Qu'est-ce que la production en grandes séries ?",["Le produit est unique mais le nombre d'unités produites est quasiment illimité","C'est la fabrication de produits standardisés en très grandes quantités afin de réaliser des économies d'échelle","C'est la production à la commande","C'est la production en petites quantités de produits ou de services identiques"],[1]);
+TD("TD4 Agonhossou 23-37","m","Quels sont les critères de choix du système de production retenu par une entreprise ?",["Les progrès de la technologie","Les délais de fabrication","Le système de production retenu par les concurrents directs","Le système de production retenu par les concurrents indirects","L'organisation du travail"],[0,1,4]);
+TD("TD4 Agonhossou 23-37","u","Qu'est-ce que la production en flux poussés ?",["On établit des plans de production à partir des prévisions commerciales","On établit des plans de production en fonction des besoins exprimés","On établit des plans de production à partir des contraintes de l'environnement","On établit des plans de production à partir des choix de la concurrence"],[0]);
+TD("TD4 Agonhossou 37-55","u","Qu'est-ce que la production en flux tendus ?",["On établit des plans de production à partir des prévisions commerciales","On établit des plans de production en fonction des besoins exprimés","On établit des plans de production à partir des contraintes de l'environnement","On établit des plans de production à partir des choix de la concurrence"],[1]);
+TD("TD4 Agonhossou 37-55","m","Production en flux tendus : laquelle (ou lesquelles) représente(nt) un inconvénient ?",["Incapacité à faire face à des variations importantes de la demande","Le stock est maximal","Incapacité à faire face à des ruptures d'approvisionnement","L'entreprise est peu réactive"],[0,2]);
+TD("TD4 Agonhossou 37-55","m","Production en flux poussés : laquelle (ou lesquelles) représente(nt) un avantage ?",["Le coût du stockage est élevé","Les fournisseurs sont peu fiables","Capacité à faire face à des ruptures d'approvisionnement","Les ruptures de stock sont évitées"],[2,3]);
+TD("TD4 Agonhossou 37-55","u","Qu'est-ce que la logistique amont ?",["Elle porte sur la livraison des commandes aux clients","Elle porte sur l'approvisionnement des produits","Elle porte sur les économies d'énergie"],[1]);
+TD("TD4 Agonhossou 37-55","u","Qu'est-ce que la logistique aval ?",["Elle porte sur la livraison des commandes aux clients","Elle porte sur l'approvisionnement des produits","Elle porte sur les économies d'énergie"],[0]);
+TD("TD4 Agonhossou 37-55","v","La veille concurrentielle consiste à surveiller les besoins des clients.",["Vrai","Faux"],[1],"Elle surveille les concurrents.");
+TD("TD4 Agonhossou 37-55","v","La veille technologique consiste à surveiller la survenance éventuelle de nouveaux produits.",["Vrai","Faux"],[0]);
+TD("TD4 Agonhossou 37-55","u","À quelle phase du cycle de vie se rapporte : « politique de désinvestissement car la croissance du marché est négative et les résultats proches de zéro » ?",["Lancement","Croissance","Maturité","Déclin"],[3]);
+TD("TD4 Agonhossou 37-55","u","À quelle phase du cycle de vie se rapporte : « croissance du marché forte, apparition de concurrents et des liquidités en équilibre » ?",["Lancement","Croissance","Maturité","Déclin"],[1]);
+TD("TD4 Agonhossou 37-55","v","On définit les économies d'échelle comme la réduction des coûts unitaires de production grâce à la baisse de la taille des structures productives.",["Vrai","Faux"],[1],"C'est grâce à la hausse de la taille.");
+TD("TD4 Agonhossou 37-55","u","Le management opérationnel :",["N'a aucune incidence sur le management stratégique","Peut exercer une certaine influence sur le management stratégique","Conditionne le management stratégique"],[2]);
+TD("TD4 Agonhossou 37-55","u","Les décisions opérationnelles :",["Sont indépendantes de la stratégie","Se prennent en même temps que les décisions stratégiques","Doivent être cohérentes avec les orientations stratégiques prédéfinies"],[2]);
+TD("TD4 Agonhossou 37-55","u","Le management opérationnel :",["Permet l'acquisition de nouvelles ressources","Vise à utiliser plus efficacement les ressources existantes","Ne concerne pas les ressources de l'entreprise"],[1]);
+TD("TD4 Agonhossou 37-55","u","Le management opérationnel peut conduire l'entreprise à :",["Recentrer son activité sur les quelques produits les plus appréciés par les clients","Négocier de nouveaux objectifs avec les commerciaux","Entreprendre des actions de communication pour expliquer aux salariés ses orientations stratégiques"],[2]);
+TD("TD4 Agonhossou 37-55","m","La gestion administrative consiste à :",["Recruter, former et licencier le personnel de l'entreprise","Assurer le fonctionnement quotidien de l'entreprise","Prévoir, organiser, commander, coordonner et contrôler l'activité de l'entreprise"],[1,2]);
+TD("TD4 Agonhossou 37-55","u","Le management se définit comme :",["L'art de créer une entreprise","L'art de satisfaire les clients","L'art de diriger une entreprise"],[2]);
+TD("TD4 Agonhossou 37-55","u","Que signifie BCG ?",["Business Cabinet Général","Business Courbe Graphique","Boston Consulting Group","Business Consultation Groupement"],[2]);
+TD("TD4 Agonhossou 37-55","v","Le portefeuille d'activités est l'ensemble des domaines d'activités sur lesquels agit l'entreprise.",["Vrai","Faux"],[0]);
+TD("TD4 Agonhossou 55-70","u","À quel type de produit se rapporte : « produits en croissance forte qui permettent de dégager d'importantes liquidités » ?",["Les produits « vache à lait »","Les produits « dilemmes »","Les produits « vedettes »","Les produits « poids morts »"],[2]);
+TD("TD4 Agonhossou 55-70","u","À quel type de produit se rapporte : « produits en phase de lancement pour lesquels il est nécessaire de mobiliser des ressources financières importantes pour assurer leur développement » ?",["Les produits « vache à lait »","Les produits « dilemmes »","Les produits « vedettes »","Les produits « poids morts »"],[1]);
+TD("TD4 Agonhossou 55-70","u","À quel type de produit se rapporte : « produits condamnés à disparaître car ils n'apportent rien à l'entreprise » ?",["Les produits « vache à lait »","Les produits « dilemmes »","Les produits « vedettes »","Les produits « poids morts »"],[3]);
+TD("TD4 Agonhossou 55-70","u","À quel type de produit se rapporte : « produits dont la rentabilité est très forte mais qui appartiennent à un domaine d'activité où la croissance est réduite » ?",["Les produits « vache à lait »","Les produits « dilemmes »","Les produits « vedettes »","Les produits « poids morts »"],[0]);
+TD("TD4 Agonhossou 55-70","u","À quelle catégorie de technologies se rapporte : « technologies indispensables pour maîtriser son métier » ?",["Les technologies de base","Les technologies clés","Les technologies de veille","Les technologies émergentes","Les technologies de pointe","Les technologies en déclin"],[0]);
+TD("TD4 Agonhossou 55-70","u","À quelle catégorie de technologies se rapporte : « technologies en développement au potentiel prometteur » ?",["Les technologies de base","Les technologies clés","Les technologies de veille","Les technologies émergentes","Les technologies de pointe","Les technologies en déclin"],[3]);
+TD("TD4 Agonhossou 55-70","m","Les principaux critères utilisés pour établir un diagnostic financier sont :",["La solvabilité","La rentabilité","Les immobilisations","Le montant des salaires","Les ratios d'endettement"],[0,1,4]);
+TD("TD4 Agonhossou 55-70","u","Comment caractériser la notion de rentabilité dans l'entreprise ?",["C'est la capacité de l'entreprise à régler ses dettes à échéance","C'est la capacité de financer elle-même la plupart de ses investissements","C'est la faible capacité d'endettement","C'est la capacité de l'entreprise à sécréter un bénéfice"],[3]);
+TD("TD4 Agonhossou 55-70","m","Quels sont les intérêts de la stratégie de spécialisation ?",["Le besoin de flexibilité","Atteinte de la taille critique","Réalisation d'effets d'expérience","Elle est adaptée aux produits standardisés","Suppression des économies d'échelle"],[1,2,3]);
+TD("TD4 Agonhossou 55-70","m","Quels sont les inconvénients de la stratégie de diversification ?",["Répartition des risques liés à la conjoncture","Renforcement d'unité entre les différentes activités","Dispersion des ressources","Investissements peu importants","Culture et identité diluées"],[2,4]);
+TD("TD4 Agonhossou 55-70","m","Pour faire face aux cinq forces concurrentielles, Michael Porter écrit que les entreprises auront le choix entre trois stratégies génériques. Lesquelles ?",["Stratégie de différenciation","Stratégie de domination par les coûts","Stratégie de segmentation","Stratégie de focalisation","Stratégie de dégagement"],[0,1,3]);
+TD("TD4 Agonhossou 55-70","u","À quelle stratégie générique se rapporte : « l'entreprise se concentre sur un segment du marché où sa rentabilité sera plus forte que celle de ses concurrents présents sur l'ensemble des segments » ?",["Stratégie de différenciation","Stratégie de domination par les coûts","Stratégie de segmentation","Stratégie de focalisation","Stratégie de dégagement"],[3]);
+TD("TD4 Agonhossou 55-70","v","L'impartition peut se définir comme une politique de coopération entre plusieurs partenaires, disposant de potentiels complémentaires.",["Vrai","Faux"],[0]);
+TD("TD4 Agonhossou 55-70","u","Complétez : « La (mot à trouver) est une procédure formalisée qui a pour but de produire un résultat articulé sous la forme d'un système intégré de décisions ».",["Budgétisation","Charte d'entreprise","Planification","Segmentation"],[2]);
+TD("TD4 Agonhossou 55-70","u","Complétez : « Un (mot à trouver) est un plan élaboré par les centres de responsabilité sur la base des orientations de la direction générale ».",["Objectif","Plan opérationnel","Résultat articulé","Plan stratégique"],[1]);
+TD("TD4 Agonhossou 72-81","u","Regroupement d'individus qui, après répartition des tâches, travaillent à un objectif commun, à savoir la production de biens et de services :",["Structure","Organisation","Firme","Aucune de ces réponses"],[1],"",1);
+TD("TD4 Agonhossou 72-81","m","Les mécanismes de coordination du travail sont :",["Division du travail","Supervision directe","Sommet stratégique","Ajustement mutuel"],[1,3],"",1);
+TD("TD4 Agonhossou 72-81","u","Max Weber a créé :",["L'OST","L'école des relations humaines","L'approche politique","Aucune de ces réponses"],[3],"Weber est le théoricien de la bureaucratie.",1);
+TD("TD4 Agonhossou 72-81","u","« Il a introduit dans l'analyse des organisations le phénomène de dynamique de groupe » :",["E. Mayo","H. Fayol","K. Lewin","R. Likert"],[2],"",1);
+TD("TD4 Agonhossou 72-81","u","« Le leadership démocratique est préconisé par lui comme étant le plus efficace » :",["K. Lewin","D. McGregor","F. Herzberg","H. Ford"],[0],"",1);
+TD("TD4 Agonhossou 72-81","u","Un ensemble de modifications observables et relativement durables affectant un ou plusieurs aspects de l'organisation :",["Résistance au changement","Changement organisationnel","Organisation","Downsizing","Agent du changement"],[1],"",1);
+TD("TD4 Agonhossou 72-81","u","Expression implicite ou explicite de réactions de défense à l'endroit de l'intention de changement :",["Résistance au changement","Changement organisationnel","Organisation","Downsizing","Agent du changement"],[0],"",1);
+TD("TD4 Agonhossou 72-81","u","Étape durant laquelle des mesures sont prises pour transformer la situation, en modifiant les tâches, la structure, la technologie ou l'effectif de l'organisation :",["Recristallisation","Décristallisation","Unfreezing","Transition"],[3],"Les 3 étapes de Lewin : dégel, modification (transition), regel.",1);
+TD("TD4 Agonhossou 72-81","u","Ils sont des auteurs de l'école de la contingence, sauf :",["Henry Mintzberg","Lawrence et Lorsch","Burns et Stalker","Woodward","Crozier et Friedberg"],[4]);
+/* ===== TD N°1 Assogba ===== */
+const FM=["Planification","Organisation","Impulsion","Contrôle"];
+TD("TD1 Assogba D1","m","Quelles sont les six fonctions de l'entreprise selon Henry FAYOL ?",["Technique","Commerciale","Financière","Sécurité","Comptable","Administrative","Marketing","Logistique"],[0,1,2,3,4,5]);
+TD("TD1 Assogba D1","m","Quels sont les principaux types de contrôle ?",["Contrôle a priori (proactif)","Contrôle concomitant (continu)","Contrôle a posteriori (rétroactif)","Contrôle hiérarchique"],[0,1,2]);
+TD("TD1 Assogba D1","v","Toutes les organisations sont des entreprises.",["Vrai","Faux"],[1],"Toutes les organisations ne sont pas à but lucratif.");
+TD("TD1 Assogba D1","v","Le management est synonyme de gestion.",["Vrai","Faux"],[1]);
+TD("TD1 Assogba D1","v","Les ressources humaines d'une organisation sont encore appelées son personnel.",["Vrai","Faux"],[1],"Les ressources humaines ont d'autres composantes que le personnel.");
+TD("TD1 Assogba D1","v","Le développement de l'industrie est un héritage de l'OST de F. Taylor.",["Vrai","Faux"],[0]);
+TD("TD1 Assogba D1","v","L'OST de F. Taylor a fortement œuvré à l'épanouissement des travailleurs.",["Vrai","Faux"],[1],"Elle a participé à l'aliénation et à la déshumanisation du travailleur.");
+TD("TD1 Assogba D1","v","Le management est une science sociale.",["Vrai","Faux"],[0]);
+TD("TD1 Assogba D1","v","La fonction RH s'impose à toutes les organisations.",["Vrai","Faux"],[0]);
+TD("TD1 Assogba D1","v","Le service RH s'impose à toutes les organisations.",["Vrai","Faux"],[1],"Cela dépend de la taille de l'organisation.");
+TD("TD1 Assogba D1","v","La gestion des RH est une activité flexible.",["Vrai","Faux"],[0],"Elle va au-delà de l'application des textes.");
+TD("TD1 Assogba D1","v","La gestion du personnel est une activité formelle.",["Vrai","Faux"],[0],"Elle est basée sur les textes.");
+for(const [c,f] of [["les objectifs, les prévisions et les projections",0],["les programmes",0],["l'organigramme, la structure et les fonctions",1],["l'autorité, le pouvoir et les sanctions",1],["la motivation et la rémunération",2],["la valorisation et l'épanouissement",2],["l'audit et l'évaluation",3],["les écarts et les réalisations",3]]) TD("TD1 Assogba D1","u","À quelle fonction managériale se rattachent : "+c+" ?",FM,[f]);
+TD("TD1 Assogba D2","u","Repérez l'intrus parmi les fondateurs de l'École des relations humaines :",["Frederick Taylor","Kurt Lewin","Abraham Maslow"],[0]);
+TD("TD1 Assogba D2","u","On désigne les études menées par Elton Mayo et d'autres chercheurs de Harvard sous le nom de :",["Expérience de Glenburg","Expérience de Hawthorne","Expérience de Taylor","Expérience de Friedman"],[1]);
+TD("TD1 Assogba D2","u","Selon les travaux d'Elton Mayo :",["La simple connaissance par l'individu qu'il est sujet d'observation ne modifie pas son comportement","Si la direction exprime un intérêt pour le comportement des salariés, cela peut améliorer leur productivité","Si la direction exprime un intérêt pour le comportement des salariés, cela n'améliore jamais leur productivité"],[1]);
+TD("TD1 Assogba D2","u","Selon Henry Fayol, l'administration des entreprises se définit selon la formule :",["Planifier, organiser, commander, coordonner et contrôler","Planifier, organiser, commander, coordonner et gérer","Planifier, organiser, commander, coordonner et motiver","Planifier, organiser, commander, coordonner et individualiser"],[0]);
+TD("TD1 Assogba D2","u","Le salaire comme motivation la plus importante est un principe de base :",["Du taylorisme","De la théorie de Herzberg","D'Elton Mayo","De l'école sociotechnique"],[0]);
+TD("TD1 Assogba D2","u","Le père fondateur de l'organigramme hiérarchique est :",["Frederick Taylor","Henry Fayol","Henry Mintzberg","Max Weber"],[1]);
+TD("TD1 Assogba D2","u","Le père fondateur de l'organigramme fonctionnel est :",["Frederick Taylor","Henry Fayol","Henry Mintzberg","Max Weber"],[0]);
+TD("TD1 Assogba D2","u","La structure selon Henry Mintzberg est :",["Une entité qui combine des facteurs de production afin de produire des biens et des services","Un ensemble d'éléments cohérent et orientés vers une finalité","La somme totale des moyens utilisés pour diviser le travail en des tâches distinctes et pour assurer ensuite une coordination entre elles","La représentation graphique d'une entreprise"],[2]);
+TD("TD1 Assogba D2","u","L'organigramme décentralisé est le plus souvent adopté par :",["Les multinationales","Les mairies","Un ministère","Le ministère de la décentralisation"],[0]);
+TD("TD1 Assogba D2","u","Kurt Lewin est le père fondateur de :",["La motivation","Du leadership","De la dynamique de groupe","Du management systémique"],[2]);
+TD("TD1 Assogba D2","u","Le principe de base de l'organigramme matriciel est :",["Le principe de l'unicité du commandement","Le principe de la double ligne","Le principe de la double hiérarchie","Le principe de la spécialisation"],[2],"Le cours : la structure matricielle repose sur une double hiérarchie.",1);
+TD("TD1 Assogba D2","u","Le principe de base de l'organigramme staff and line est :",["Le principe de l'unicité du commandement","Le principe de la double ligne","Le principe de la double hiérarchie","Le principe de la spécialisation"],[1],"Le cours : la structure hiérarchico-fonctionnelle repose sur la double ligne.",1);
+TD("TD1 Assogba D2","u","Le rôle de pacificateur fait partie :",["Des rôles interpersonnels du manager de Mintzberg","Des rôles décisionnels du manager de Mintzberg","Des rôles informationnels du manager de Mintzberg"],[1],"",1);
+TD("TD1 Assogba D2","u","Le rôle de dirigeant fait partie :",["Des rôles interpersonnels du manager de Mintzberg","Des rôles décisionnels du manager de Mintzberg","Des rôles informationnels du manager de Mintzberg"],[0],"Interpersonnels : symbole, dirigeant (leader), agent de liaison.");
+/* ===== Questions d'entraînement (réponses types) ===== */
+CARD("Définis le management.","Un processus spécifique consistant en activités de planification, d'organisation, d'impulsion et de contrôle, visant à déterminer et à réaliser des objectifs grâce à l'emploi d'êtres humains et à la mise en œuvre d'autres ressources.","Cours, ch. I");
+CARD("Quelles sont les 4 fonctions managériales (processus de gestion) ?","Planification, organisation, impulsion (direction), contrôle.","Cours, ch. III");
+CARD("Énonce les principes de base de l'OST de Taylor.","Sélection scientifique des ouvriers ; spécialisation accrue ; développement des travailleurs par la formation ; one best way (la meilleure méthode) ; élimination des gestes inutiles ; séparation conception / exécution ; coopération étroite entre dirigeants et personnel non dirigeant.","Cours, ch. II ; tes notes");
+CARD("Quelles sont les limites de l'OST ?","Conception trop rigide et mécaniste de l'homme au travail ; absence d'épanouissement des individus ; mauvaise approche de l'homme en situation de travail ; aliénation, déshumanisation, dépersonnalisation du travailleur.","Cours, ch. II");
+CARD("Quelles sont les trois formes d'autorité selon Max Weber ?","Charismatique (personnalité du leader), traditionnelle (coutume, statut ou hérédité) et rationnelle-légale (textes précis, fonction). La rationnelle-légale fonde la bureaucratie, l'organisation idéale selon Weber.","Cours, ch. VII");
+CARD("Quelles sont les sources interpersonnelles du pouvoir selon French et Raven ?","Pouvoir légitime, de coercition, de récompense (gratification), de référence (exemple) et d'expertise (compétence).","Cours ; tes notes");
+CARD("Cite les 10 rôles du manager selon Mintzberg.","Interpersonnels : symbole, leader (dirigeant), agent de liaison. Informationnels : récepteur, diffuseur, porte-parole (transmetteur). Décisionnels : régulateur (pacificateur), entrepreneur (chef d'entreprise), négociateur, répartiteur de ressources.","Cours, ch. IV ; tes notes");
+CARD("Quelles sont les 5 composantes de l'organisation selon Mintzberg ?","Le sommet stratégique (direction générale), la ligne hiérarchique, le centre opérationnel, la technostructure et les supports logistiques.","Cours, ch. VII");
+CARD("Quelles sont les trois étapes du changement selon Kurt Lewin ?","Le dégel (décristallisation), la modification (changement, transition) et le regel (recristallisation).","Tes notes");
+CARD("Décris les trois étapes du processus de contrôle.","1) Mesurer les réalisations (résultats obtenus) ; 2) analyser les écarts entre réalisations et prévisions ; 3) corriger les écarts défavorables.","Cours, ch. III");
+CARD("Distingue les décisions opérationnelles, tactiques et stratégiques.","Opérationnelle : court terme, réversible, prise par les managers de proximité. Tactique (administrative) : moyen terme, prise par les cadres moyens, concerne le pilotage des fonctions. Stratégique : long terme, exceptionnelle, non programmable, mobilise d'importantes ressources, prise par les hauts dirigeants (choix des produits et des marchés).","Tes notes ; cours");
+CARD("Donne les avantages et inconvénients de la structure fonctionnelle.","Avantages : spécialisation des compétences, bénéfice de l'expertise des spécialistes, prise de décision rapide. Inconvénients : pluralité de commandement, ambiguïté dans les prises de décision, difficulté de coordination et de circulation de l'information.","Tes notes");
+CARD("Donne les avantages et inconvénients de la structure hiérarchico-fonctionnelle (staff and line).","Avantages : clarté hiérarchique, bonne répartition des tâches, excellente qualité des décisions prises. Inconvénients : organigramme coûteux ; risque de conflit entre les deux lignes (commandement et conseil).","Tes notes ; cours");
+CARD("Quelles sont les cinq forces concurrentielles de Porter et ses trois stratégies génériques ?","Forces : menace des nouveaux entrants, pouvoir de négociation des fournisseurs, pouvoir de négociation des clients, menace des produits de substitution, rivalité dans le secteur. Stratégies : domination par les coûts, différenciation, focalisation.","Tes notes");
+CARD("Compare Maslow et Alderfer.","Maslow : 5 niveaux de besoins hiérarchisés, avec un principe d'assouvissement progressif. Alderfer : 3 catégories (existence, relation, croissance), avec en plus le principe de frustration-régression.","Tes notes");
+CARD("Compare la DPO et la DPPO.","Toutes deux sont des modes de direction décentralisés reposant sur un système d'objectifs. En DPO, les agents ne sont pas associés à la définition des objectifs qu'ils doivent réaliser ; en DPPO (participative), ils le sont activement.","Tes notes");
+
+/* ===== APPLICATION ===== */
+const app=document.getElementById("app");let S={},sel="all",typ="all",cnt="20";
+const ls={g(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},s(k,x){try{localStorage.setItem(k,JSON.stringify(x))}catch(e){}}};
+const EK="mg_err",errs=()=>ls.g(EK)||[];
+const h=(t,c,x,f)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;if(f)e.onclick=f;return e};
+const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const sk=(l,opts,get,set)=>{const s=document.createElement("select");opts.forEach(([v,t])=>{const o=h("option",0,t);o.value=v;if(v==get())o.selected=true;s.append(o)});s.onchange=()=>set(s.value);return s};
+const fill=(t,o,a)=>{let j=0;return t.replace(/\{\}/g,()=>o[a[j++]])};
+const ansTxt=q=>q.k=="o"?q.a:q.a.map(k=>q.o[k]).join(" ; ");
+function askF(c,q,id){
+ const line=h("p","q"),sels=[],parts=q.tpl.split("{}");
+ parts.forEach((p,j)=>{line.append(document.createTextNode(p));if(j<parts.length-1){const s=document.createElement("select");s.style.cssText="width:auto;max-width:100%;margin:4px 2px";const z=h("option",0,"…");z.value="";s.append(z);q.o.forEach((t,k)=>{const o=h("option",0,t);o.value=k;s.append(o)});sels.push(s);line.append(s)}});
+ c.append(line);
+ const b=h("button","p","Valider",()=>{
+  const p=sels.map(s=>s.value);if(p.some(x=>x===""))return;const n=p.map(Number);
+  const ok=q.alts.some(a=>a.every((x,j)=>x==n[j]));
+  sels.forEach((s,j)=>{s.disabled=true;s.style.border="2px solid "+(q.alts.some(a=>a[j]==n[j])?"var(--ok)":"var(--ko)")});
+  b.remove();let e=errs();if(ok){S.ok++;e=e.filter(x=>x!=id)}else{S.bad.push(id);if(!e.includes(id))e.push(id)}ls.s(EK,e);
+  c.append(h("div","ex",(ok?"Correct. ":"Faux. ")+"Formule : "+ansTxt(q)+(q.e?" — "+q.e:"")+(q.dd?" Réponse déduite du cours, absente de ta clé.":"")),h("button","p",S.n+1<S.ids.length?"Question suivante":"Voir le résultat",()=>{S.n++;S.n<S.ids.length?ask():end()}));
+ });
+ c.append(b);app.append(c);
+}
+function askO(c,q,id){
+ const rec=ok=>{let e=errs();if(ok){S.ok++;e=e.filter(x=>x!=id)}else{S.bad.push(id);if(!e.includes(id))e.push(id)}ls.s(EK,e);S.n++;S.n<S.ids.length?ask():end()};
+ c.append(h("div","meta","Réponds dans ta tête ou sur papier, puis vérifie."));
+ const b=h("button","p","Voir la réponse type",()=>{b.remove();c.append(h("div","ex",q.a),h("button","ok","Je savais",()=>rec(true)),h("button","ko","À revoir",()=>rec(false)))});
+ c.append(b);app.append(c);
+}
+function home(){
+ app.replaceChildren(h("h1",0,"Quiz Management"),h("p","s","Questions tirées de tes TD et du modèle SEG : "+Q.length+" au total. Tes erreurs sont mémorisées sur cet appareil. Les réponses viennent de tes clés ; celles déduites du cours sont signalées."));
+ const c=h("div","card");c.append(h("div","meta","Thème"));
+ [["all","Tous ("+Q.length+")"],...Object.keys(T).map(k=>[k,T[k]+" ("+Q.filter(q=>q.t==k).length+")"]),["err","Mes erreurs ("+errs().length+")"]].forEach(([k,l])=>c.append(h("button",sel==k?"sel":"",l,()=>{sel=k;home()})));
+ c.append(h("div","meta","Type de question"),sk(0,[["all","Tous les types"],["u","QCU"],["m","QCM (plusieurs réponses)"],["v","Vrai / Faux"],["o","Question d'entraînement"]],()=>typ,x=>typ=x),
+  h("div","meta","Nombre de questions"),sk(0,[["10","10"],["20","20"],["30","30 (épreuve blanche)"],["999","Toutes"]],()=>cnt,x=>cnt=x),h("button","p","Commencer",start));
+ app.append(c);
+}
+function start(){
+ let ids=Q.map((_,i)=>i).filter(i=>(sel=="all"||(sel=="err"?errs().includes(i):Q[i].t==sel))&&(typ=="all"||(Q[i].y||Q[i].k)==typ));
+ if(!ids.length){alert("Aucune question pour ce choix.");return}
+ S={ids:shuf(ids).slice(0,+cnt),n:0,ok:0,bad:[]};ask();
+}
+function ask(){
+ const id=S.ids[S.n],q=Q[id];app.replaceChildren();
+ const bar=h("div","bar"),i=document.createElement("i");i.style.width=(S.n/S.ids.length*100)+"%";bar.append(i);
+ app.append(h("div","meta",(S.n+1)+"/"+S.ids.length+" · "+q.s+" · "+K[q.y||q.k]),bar);
+ const c=h("div","card");c.append(h("p","q",q.q));if(q.k=="m")c.append(h("div","meta","Coche toutes les bonnes réponses, puis valide."));
+ if(q.k=="o"){askO(c,q,id);return}
+ let done=false;const pk=new Set();let val;
+ const bs=q.o.map((o,k)=>h("button","",(q.k=="v"?"":String.fromCharCode(97+k)+") ")+o,()=>{
+  if(done)return;
+  if(q.k=="m"){pk.has(k)?pk.delete(k):pk.add(k);bs[k].classList.toggle("sel")}else fin([k]);
+ }));
+ bs.forEach(b=>c.append(b));
+ function fin(p){
+  done=true;if(val)val.remove();
+  const ok=p.length==q.a.length&&p.every(x=>q.a.includes(x));
+  bs.forEach((b,k)=>{b.classList.remove("sel");if(q.a.includes(k))b.classList.add("ok");else if(p.includes(k))b.classList.add("ko")});
+  let e=errs();if(ok){S.ok++;e=e.filter(x=>x!=id)}else{S.bad.push(id);if(!e.includes(id))e.push(id)}ls.s(EK,e);
+  c.append(h("div","ex",(ok?"Correct. ":"Faux. ")+"Réponse : "+ansTxt(q)+(q.e?" — "+q.e:"")+(q.dd?" Réponse déduite du cours, absente de ta clé.":"")),
+   h("button","p",S.n+1<S.ids.length?"Question suivante":"Voir le résultat",()=>{S.n++;S.n<S.ids.length?ask():end()}));
+ }
+ if(q.k=="m"){val=h("button","p","Valider",()=>{if(!done&&pk.size)fin([...pk])});c.append(val)}
+ app.append(c);
+}
+function end(){
+ app.replaceChildren();const p=Math.round(S.ok/S.ids.length*100),c=h("div","card");
+ c.append(h("div","meta","Résultat"),h("div","big",S.ok+" / "+S.ids.length+" ("+p+" %)"),h("p","s",p>=80?"Solide. Refais tes erreurs restantes.":p>=60?"Correct. Refais tes erreurs.":"À retravailler : relis les corrigés puis recommence."));
+ if(S.bad.length){c.append(h("div","meta","À revoir"));S.bad.forEach(i=>{const q=Q[i],e=h("div","err");e.append(h("b",0,q.q),h("div",0,"Réponse : "+ansTxt(q)+(q.e?" — "+q.e:"")+(q.dd?" Réponse déduite du cours, absente de ta clé.":"")));c.append(e)})}
+ c.append(h("button","p","Refaire mes erreurs",()=>{sel="err";typ="all";start()}),h("button",0,"Accueil",home));app.append(c);
+}
+home();
+</script></body></html>
